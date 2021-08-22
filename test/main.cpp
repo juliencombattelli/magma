@@ -1,6 +1,8 @@
 #include <magma/Instance.hpp>
 #include <magma/glfw/GlfwStack.hpp>
 
+#include <yaml-cpp/yaml.h>
+
 #include <algorithm>
 #include <cstdlib>
 #include <iostream>
@@ -26,15 +28,19 @@ uint32_t findGraphicsQueueFamilyIndex(
         std::distance(queueFamilyProperties.begin(), graphicsQueueFamilyProperty));
 }
 
-int main(int argc, char* argv[]) try {
-    // TODO load ContextCreateInfo from file
+magma::ContextDebugConfig loadFromFile(const std::string& filename) {
+    YAML::Node configFile = YAML::LoadFile(filename);
+    magma::ContextDebugConfig debugConfig{
+        .validationLayer = configFile["validationLayer"].as<bool>(),
+        .debugUtilsExtension = configFile["debugUtilsExtension"].as<bool>(),
+        .verbose = configFile["verbose"].as<bool>(),
+    };
+    return debugConfig;
+}
 
+int main(int argc, char* argv[]) try {
     magma::ContextCreateInfo createInfo{
-        .debugConfig = {
-            .validationLayer = true,
-            .debugUtilsExtension = true,
-            .verbose = false,
-        },
+        .debugConfig = loadFromFile("MagmaDebugConfig.yaml"),
         .applicationName = applicationName,
         .applicationVersion = applicationVersion,
     };
