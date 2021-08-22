@@ -9,6 +9,7 @@ find_package(glfw3 3.3 REQUIRED CONFIG)
 find_package(glm REQUIRED CONFIG)
 find_package(Vulkan REQUIRED)
 
+include(${PROJECT_SOURCE_DIR}/cmake/Dependencies/yaml-cpp.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/Modules/MagmaCompileShader.cmake)
 
 configure_file (
@@ -23,10 +24,18 @@ target_include_directories(magma
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(magma PUBLIC glm::glm glfw Vulkan::Vulkan ${CMAKE_DL_LIBS})
+target_link_libraries(magma
+    PUBLIC
+        glm::glm glfw Vulkan::Vulkan
+    PRIVATE
+        ${CMAKE_DL_LIBS}
+)
 
 add_executable(test test/main.cpp)
-target_link_libraries(test PRIVATE magma)
+target_link_libraries(test
+    PRIVATE
+        magma yaml-cpp::yaml-cpp
+)
 
 Magma_AddShader(shader_vert shaders/shader.vert)
 Magma_AddShader(shader_frag shaders/shader.frag)
