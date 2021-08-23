@@ -55,13 +55,15 @@ Generating a shader pack
 
 cmake_minimum_required(VERSION 3.20)
 
-find_package(Vulkan REQUIRED)
-
-if(NOT TARGET Vulkan::glslc)
-    message(FATAL_ERROR "glslc not found")
-endif()
+function(_Magma_FindVulkanGlslc)
+    find_package(Vulkan REQUIRED)
+    if(NOT TARGET Vulkan::glslc)
+        message(FATAL_ERROR "glslc not found")
+    endif()
+endfunction()
 
 function(Magma_AddShader TARGET SHADER)
+    _Magma_FindVulkanGlslc()
     cmake_path(ABSOLUTE_PATH SHADER OUTPUT_VARIABLE SHADER_PATH)
     cmake_path(GET SHADER FILENAME SHADER_NAME)
     add_custom_command(OUTPUT shaders/${SHADER_NAME}.spirv
