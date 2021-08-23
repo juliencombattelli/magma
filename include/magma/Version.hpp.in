@@ -1,0 +1,13 @@
+#pragma once
+
+namespace magma {
+
+struct Version {
+    // clang-format off
+    static constexpr inline int major = @PROJECT_VERSION_MAJOR@;
+    static constexpr inline int minor = @PROJECT_VERSION_MINOR@;
+    static constexpr inline int patch = @PROJECT_VERSION_PATCH@;
+    // clang-format on
+};
+
+} // namespace magma
