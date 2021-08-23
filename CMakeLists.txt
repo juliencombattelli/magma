@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 project(Magma VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
 find_package(glfw3 3.3 REQUIRED CONFIG)
@@ -17,6 +15,7 @@ configure_file (
 )
 
 add_library(magma src/Instance.cpp src/utils/Name.cpp)
+target_compile_features(magma PUBLIC cxx_std_20)
 target_include_directories(magma
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
