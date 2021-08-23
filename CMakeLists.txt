@@ -14,10 +14,3 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/Modules/MagmaCompileShader.cmake)
 add_library(magma src/Instance.cpp src/utils/Name.cpp)
 target_include_directories(magma PUBLIC include)
 target_link_libraries(magma PUBLIC glm::glm glfw Vulkan::Vulkan ${CMAKE_DL_LIBS})
-
-add_executable(test test/main.cpp)
-target_link_libraries(test PRIVATE magma)
-
-Magma_AddShader(shader_vert shaders/shader.vert)
-Magma_AddShader(shader_frag shaders/shader.frag)
-
