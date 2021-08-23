@@ -1,0 +1,38 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "hidden": true,
+            "name": "base",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/_build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_DIR": "${sourceDir}/_install/${presetName}"
+            }
+        },
+        {
+            "name": "debug",
+            "displayName": "Debug Config",
+            "description": "Debug configuration",
+            "inherits": [
+                "base"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release Config",
+            "description": "Release configuration",
+            "inherits": [
+                "base"
+            ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        }
+    ],
+    "buildPresets": [],
+    "testPresets": []
+}
