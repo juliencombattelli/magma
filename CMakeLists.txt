@@ -1,30 +1,129 @@
 cmake_minimum_required(VERSION 3.20)
 project(Magma VERSION 1.0.0)
 
+################################################################################
+### Options definition
+################################################################################
+
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set(MAGMA_ENABLE_TESTING_IF_STANDALONE ON)
+else()
+    set(MAGMA_ENABLE_TESTING_IF_STANDALONE OFF)
+endif()
+
+option(MAGMA_ENABLE_TESTING "Enable building the tests" ${MAGMA_ENABLE_TESTING_IF_STANDALONE})
+
+################################################################################
+### Global CMake configuration
+################################################################################
+
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
-find_package(glfw3 3.3 REQUIRED CONFIG)
-find_package(glm REQUIRED CONFIG)
+################################################################################
+### Dependency handling
+################################################################################
+
+find_package(glfw3 3.3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
+################################################################################
+### Make utility scripts visible to the user
+################################################################################
+
 include(${PROJECT_SOURCE_DIR}/cmake/Modules/MagmaCompileShader.cmake)
+
+################################################################################
+### Magma library definition
+################################################################################
+
+include(GNUInstallDirs)
 
 configure_file (
     "${PROJECT_SOURCE_DIR}/include/magma/Version.hpp.in"
     "${PROJECT_BINARY_DIR}/include/magma/Version.hpp"
 )
 
-add_library(magma src/Instance.cpp src/utils/Name.cpp)
-target_compile_features(magma PUBLIC cxx_std_20)
-target_include_directories(magma
+add_library(Magma src/Instance.cpp src/utils/Name.cpp)
+target_compile_features(Magma PUBLIC cxx_std_20)
+target_include_directories(Magma
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
-target_link_libraries(magma
+target_link_libraries(Magma
     PUBLIC
         glm::glm glfw Vulkan::Vulkan
     PRIVATE
         ${CMAKE_DL_LIBS}
+)
+
+add_library(Magma::Magma ALIAS Magma)
+
+################################################################################
+### Test execution
+################################################################################
+
+if(MAGMA_ENABLE_TESTING)
+    enable_testing()
+    # add_subdirectory(test)
+endif()
+
+################################################################################
+### Package config file generation and installation
+################################################################################
+
+set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+
+# Generate CMake package config file
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION ${ConfigPackageLocation}
+)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+# Install the package config and version files
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${ConfigPackageLocation}
+)
+
+################################################################################
+### Magma library installation
+################################################################################
+
+# Install the library and the headers, and generate a target file
+install(
+    TARGETS Magma
+    EXPORT ${PROJECT_NAME}Targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include/magma ${PROJECT_BINARY_DIR}/include/magma
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    PATTERN "*.in" EXCLUDE
+)
+
+# Install the target file
+install(
+    EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${ConfigPackageLocation}
+)
+
+# Install the CMake scripts
+install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/cmake/Modules
+    DESTINATION ${ConfigPackageLocation}
 )

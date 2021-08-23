@@ -1,0 +1,26 @@
+@PACKAGE_INIT@
+
+# Handle transitive dependencies
+include(CMakeFindDependencyMacro)
+find_dependency(glfw3 3.3 CONFIG)
+find_dependency(glm CONFIG)
+find_dependency(Vulkan)
+
+if(NOT TARGET Magma::Magma)
+    include("${CMAKE_CURRENT_LIST_DIR}/MagmaTargets.cmake")
+endif()
+
+# Handle submodules research
+# > No component for now
+# foreach(component ${Magma_FIND_COMPONENTS})
+#     # For requested component, execute its "config" script
+#     include(
+#         ${CMAKE_CURRENT_LIST_DIR}/Magma${component}Targets.cmake
+#         RESULT_VARIABLE Magma_${component}_FOUND
+#   )
+# endforeach()
+
+# Include utility scripts
+include("${CMAKE_CURRENT_LIST_DIR}/Modules/MagmaCompileShader.cmake")
+
+check_required_components(Magma)
