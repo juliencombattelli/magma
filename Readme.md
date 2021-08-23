@@ -1,3 +1,5 @@
+# Magma
+
 ## Supported platforms
 
 This project is tested on the following platforms:
@@ -48,7 +50,7 @@ Open a prompt with x64 build tools available, go at the project root location an
 # Configure the project
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -Dglfw3_DIR="<path/to/glfw>" -Dglm_DIR="<path/to/glm>" \
     -S . -B build-ninja-multi-msvc -G "Ninja Multi-Config"
-    
+
 # Build the project
 cmake --build build-ninja-multi-msvc --config release
 ```
