@@ -28,8 +28,12 @@ find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
 ################################################################################
-### Make utility scripts visible to the user
+### Include utility scripts
 ################################################################################
+
+include(${PROJECT_SOURCE_DIR}/cmake/Scripts/Sanitizers.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/Scripts/StaticAnalyzers.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/Scripts/Warnings.cmake)
 
 include(${PROJECT_SOURCE_DIR}/cmake/Modules/MagmaCompileShader.cmake)
 
@@ -45,6 +49,8 @@ configure_file (
 )
 
 add_library(Magma src/Instance.cpp src/utils/Name.cpp)
+target_project_warnings(Magma)
+target_enable_sanitizers(Magma)
 target_compile_features(Magma PUBLIC cxx_std_20)
 target_include_directories(Magma
     PUBLIC
