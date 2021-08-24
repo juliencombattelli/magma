@@ -35,6 +35,7 @@ find_package(Vulkan REQUIRED)
 ### Include utility scripts
 ################################################################################
 
+include(${PROJECT_SOURCE_DIR}/cmake/Scripts/ForceColoredOutput.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/Scripts/Sanitizers.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/Scripts/StaticAnalyzers.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/Scripts/Warnings.cmake)
