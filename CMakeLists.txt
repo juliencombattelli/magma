@@ -48,7 +48,7 @@ include(${PROJECT_SOURCE_DIR}/cmake/Modules/MagmaCompileShader.cmake)
 
 include(GNUInstallDirs)
 
-configure_file (
+configure_file(
     "${PROJECT_SOURCE_DIR}/include/magma/Version.hpp.in"
     "${PROJECT_BINARY_DIR}/include/magma/Version.hpp"
 )
