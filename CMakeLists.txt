@@ -138,3 +138,9 @@ install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/cmake/Modules
     DESTINATION ${ConfigPackageLocation}
 )
+
+################################################################################
+### CPack config files generation
+################################################################################
+
+include(CPack)
