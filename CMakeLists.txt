@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
-project(Magma VERSION 1.0.0)
+project(Magma
+    VERSION 1.0.0
+    DESCRIPTION "Simple rendering engine based on Vulkan and GLFW"
+    HOMEPAGE_URL "https://github.com/juliencombattelli/magma"
+)
 
 ################################################################################
 ### Options definition
