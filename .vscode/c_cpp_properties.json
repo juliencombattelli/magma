@@ -6,7 +6,7 @@
             "cStandard": "c17",
             "cppStandard": "c++20",
             "intelliSenseMode": "linux-gcc-x64",
-            "compileCommands": "${workspaceFolder}/build-linux-gcc-debug/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/_build/ninja-debug/compile_commands.json"
         },
         {
             "name": "Windows",
