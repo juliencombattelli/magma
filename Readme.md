@@ -10,24 +10,28 @@ The steps to build and use the project are not guarantied to work on other platf
 
 ## Install dependencies
 
-- Vulkan SDK
+- Vulkan SDK 1.2
 - GLFW 3.3
 - GLM 0.9.9
-- EnTT ??
 
-### Ubuntu
+### Ubuntu 20.04
 
+* Install the latest Vulkan SDK:
+```bash
+wget -qO - https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo apt-key add -
+sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-focal.list https://packages.lunarg.com/vulkan/lunarg-vulkan-focal.list
+sudo apt update
+sudo apt install vulkan-sdk
 ```
-sudo apt install \
-    vulkan-tools libvulkan-dev vulkan-validationlayers-dev spirv-tools \
-    libglfw3-dev \
-    libglm-dev
+
+* Install the remaining packages:
+```bash
+sudo apt install libglfw3-dev libglm-dev
 ```
 
-> Note: if running Ubuntu on WSL2 with a Windows build that does not support WSLg, please install
-[wsl-vulkan-mesa](https://github.com/gnsmrky/wsl-vulkan-mesa)
+> Note: if running Ubuntu on WSL1, or WSL2 with a Windows build that does not support WSLg, please install [wsl-vulkan-mesa](https://github.com/gnsmrky/wsl-vulkan-mesa)
 
-### Windows
+### Windows 10
 
 * Install the Microsoft Visual C/C++ Compiler 2019 at least:
   - if you want the full-fledged Visual Studio IDE, install [Visual Studio 2019](https://visualstudio.microsoft.com/vs/)
@@ -43,16 +47,23 @@ sudo apt install \
 
 ### Ubuntu
 
+In a terminal open at the project root directory, run the following commands:
+```bash
+# Configure the project
+cmake -S . -B _build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=_install
+
+# Build, install and package the project
+cmake --build _build/release --target all install package_source package
+```
+
 ### Windows
 
 Open a prompt with x64 build tools available, go at the project root location and run the following commands:
-```shell
+```bash
 # Configure the project
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -Dglfw3_DIR="<path/to/glfw>" -Dglm_DIR="<path/to/glm>" \
+cmake -Dglfw3_DIR="<path/to/glfw>" -Dglm_DIR="<path/to/glm>" \
     -S . -B build-ninja-multi-msvc -G "Ninja Multi-Config"
 
 # Build the project
 cmake --build build-ninja-multi-msvc --config release
 ```
-
- rm -Recurse .\build-ninja-multi-msvc\ ; cmake -S . -B build-ninja-multi-msvc -Dglfw3_DIR=C:\Users\jucom\Development\VulkanWorkspace\Dependencies\glfw-3.3.4-win64-release\lib\cmake\glfw3 -Dglm_DIR=C:\Users\jucom\Development\VulkanWorkspace\Dependencies\glm-0.9.9.8\cmake\glm -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G"Ninja Multi-Config" ; cmake --build .\build-ninja-multi-msvc\
