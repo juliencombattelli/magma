@@ -6,7 +6,8 @@
             "name": "base",
             "binaryDir": "${sourceDir}/_build/${presetName}",
             "cacheVariables": {
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/_install/${presetName}"
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/_install/${presetName}",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": true
             }
         },
         {
