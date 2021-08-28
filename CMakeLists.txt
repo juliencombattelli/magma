@@ -10,12 +10,14 @@ project(Magma
 ################################################################################
 
 if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-    set(MAGMA_ENABLE_TESTING_IF_STANDALONE ON)
+    set(MAGMA_IS_USED_STANDALONE ON)
 else()
-    set(MAGMA_ENABLE_TESTING_IF_STANDALONE OFF)
+    set(MAGMA_IS_USED_STANDALONE OFF)
 endif()
 
-option(MAGMA_ENABLE_TESTING "Enable building the tests" ${MAGMA_ENABLE_TESTING_IF_STANDALONE})
+option(MAGMA_ENABLE_TESTING "Enable building the tests" ${MAGMA_IS_USED_STANDALONE})
+
+option(MAGMA_ENABLE_DEMO "Fetch and build demo app" ${MAGMA_IS_USED_STANDALONE})
 
 ################################################################################
 ### Global CMake configuration
@@ -79,6 +81,14 @@ add_library(Magma::Magma ALIAS Magma)
 if(MAGMA_ENABLE_TESTING)
     enable_testing()
     # add_subdirectory(test)
+endif()
+
+################################################################################
+### Demo build
+################################################################################
+
+if(MAGMA_ENABLE_DEMO)
+    include(${PROJECT_SOURCE_DIR}/cmake/Dependencies/MagmaDemo.cmake)
 endif()
 
 ################################################################################
