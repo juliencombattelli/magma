@@ -90,12 +90,12 @@ set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 # Generate CMake package config file
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-    ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/Config/${PROJECT_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/Config/${PROJECT_NAME}Config.cmake
     INSTALL_DESTINATION ${ConfigPackageLocation}
 )
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/Config/${PROJECT_NAME}ConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
@@ -103,8 +103,8 @@ write_basic_package_version_file(
 # Install the package config and version files
 install(
     FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/cmake/Config/${PROJECT_NAME}Config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/cmake/Config/${PROJECT_NAME}ConfigVersion.cmake
     DESTINATION ${ConfigPackageLocation}
 )
 
