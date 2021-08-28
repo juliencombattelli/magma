@@ -69,49 +69,15 @@ public:
     // TODO temporary, remove
     operator const vk::raii::Instance&() const noexcept { return instance_; }
 
-    vk::raii::PhysicalDevice pickPhysicalDevice() const {
-        auto defaultPicker
-            = [](const vk::raii::PhysicalDevices& devices) -> const vk::raii::PhysicalDevice& {
-            return devices.front();
-        };
-        return pickPhysicalDevice(defaultPicker);
-    }
+    vk::raii::PhysicalDevice pickPhysicalDevice() const;
 
     template<typename TPhysicalDevicePicker>
-    vk::raii::PhysicalDevice pickPhysicalDevice(TPhysicalDevicePicker&& pick) const {
-        vk::raii::PhysicalDevices devices(instance_);
-        removeIncompatiblePhysicalDevices(devices);
-        const auto& pickedDevice = pick(devices);
-        // A move is not possible as it would fallback to a copy since pickedDevice is const. And
-        // pick function has to return a const PhysicalDevice&, otherwise implementation would be
-        // unecessary complicated for the user:
-        //   - returning by value would force the user to handle the move inside pick
-        //   - returning a non-const& would require passing to pick the vector by value (expansive),
-        //     or by non-const& (the vector should stay read only)
-        // Thus we create a new raii object from the vkPhysicalDevice C handler.
-        return vk::raii::PhysicalDevice(instance_, *pickedDevice);
-    }
+    vk::raii::PhysicalDevice pickPhysicalDevice(TPhysicalDevicePicker&& pick) const;
 
 private:
-    static bool isDeviceCompatible(const vk::raii::PhysicalDevice& device) {
-        static const std::vector<std::string_view> requiredExtensions
-            = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-        const auto availableExtensions = device.enumerateDeviceExtensionProperties();
-        for (const auto extension : requiredExtensions) {
-            if (!utils::contains(
-                    availableExtensions, extension, &vk::ExtensionProperties::extensionName)) {
-                std::cerr << extension << " not present\n";
-                std::cerr << device.getProperties().deviceName << " is not compatible\n";
-                return false;
-            }
-        }
-        return true;
-    }
-    void removeIncompatiblePhysicalDevices(vk::raii::PhysicalDevices& devices) const {
-        auto incompatibleCount
-            = std::erase_if(devices, [](auto&& device) { return !isDeviceCompatible(device); });
-        std::cout << "Removed " << incompatibleCount << " devices\n";
-    }
+    static bool isDeviceCompatible(const vk::raii::PhysicalDevice& device);
+
+    void removeIncompatiblePhysicalDevices(vk::raii::PhysicalDevices& devices) const;
 
     vk::raii::Instance makeInstance() const;
     vk::raii::DebugUtilsMessengerEXT makeDebugMessenger() const;
@@ -132,3 +98,5 @@ private:
 };
 
 } // namespace magma
+
+#include <magma/Instance.inl>

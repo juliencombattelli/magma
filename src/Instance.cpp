@@ -111,4 +111,37 @@ Instance::ContextCreateInfoWrapper::ContextCreateInfoWrapper(const ContextCreate
     }
 }
 
+namespace {
+
+const vk::raii::PhysicalDevice& defaultPicker(const vk::raii::PhysicalDevices& devices) {
+    return devices.front();
+}
+
+} // namespace
+
+vk::raii::PhysicalDevice Instance::pickPhysicalDevice() const {
+    return pickPhysicalDevice(defaultPicker);
+}
+
+bool Instance::isDeviceCompatible(const vk::raii::PhysicalDevice& device) {
+    static const std::vector<std::string_view> requiredExtensions
+        = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    const auto availableExtensions = device.enumerateDeviceExtensionProperties();
+    for (const auto extension : requiredExtensions) {
+        if (!utils::contains(
+                availableExtensions, extension, &vk::ExtensionProperties::extensionName)) {
+            std::cerr << extension << " not present\n";
+            std::cerr << device.getProperties().deviceName << " is not compatible\n";
+            return false;
+        }
+    }
+    return true;
+}
+
+void Instance::removeIncompatiblePhysicalDevices(vk::raii::PhysicalDevices& devices) const {
+    auto incompatibleCount
+        = std::erase_if(devices, [](auto&& device) { return !isDeviceCompatible(device); });
+    std::cout << "Removed " << incompatibleCount << " devices\n";
+}
+
 } // namespace magma
