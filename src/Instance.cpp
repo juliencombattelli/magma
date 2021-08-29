@@ -1,7 +1,8 @@
 #include <magma/Instance.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include <algorithm>
-#include <iostream>
 #include <ranges>
 #include <span>
 
@@ -9,13 +10,30 @@
 #define VK_LAY_KHRONOS_VALIDATION_LAYER_NAME "VK_LAYER_KHRONOS_validation"
 #endif
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT,
-    VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-    void*) {
+static bool debugCallbackCpp(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+    vk::DebugUtilsMessageTypeFlagsEXT /*type*/,
+    const vk::DebugUtilsMessengerCallbackDataEXT& cbData, void* /*userdata*/) {
 
-    std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+    if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eError) {
+        spdlog::error(cbData.pMessage);
+    } else if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning) {
+        spdlog::warn(cbData.pMessage);
+    } else if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo) {
+        spdlog::info(cbData.pMessage);
+    } else if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose) {
+        spdlog::debug(cbData.pMessage);
+    }
+    return false;
+}
 
-    return VK_FALSE;
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* cbData,
+    void* userdata) {
+
+    vk::DebugUtilsMessengerCallbackDataEXT callbackData;
+    callbackData = *cbData;
+    return debugCallbackCpp(static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(severity),
+        static_cast<vk::DebugUtilsMessageTypeFlagBitsEXT>(type), callbackData, userdata);
 }
 
 namespace magma {
@@ -29,7 +47,7 @@ static void logNotSupportedExtensions(const std::vector<const char*>& extensions
                 [&](const char* element) { return strcmp(element, requestedExtension) == 0; },
                 &vk::ExtensionProperties::extensionName)
             == std::end(supportedExtensions)) {
-            std::cerr << "Extension " << requestedExtension << " not supported\n";
+            spdlog::error("Extension {} not supported", requestedExtension);
         }
     }
 }
@@ -41,7 +59,7 @@ static void logNotSupportedLayers(const std::vector<const char*>& layers) {
                 [&](const char* element) { return strcmp(element, requestedLayer) == 0; },
                 &vk::LayerProperties::layerName)
             == std::end(supportedLayers)) {
-            std::cerr << "Layer " << requestedLayer << " not supported\n";
+            spdlog::error("Layer {} not supported", requestedLayer);
         }
     }
 }
@@ -173,8 +191,8 @@ bool Instance::isDeviceCompatible(const vk::raii::PhysicalDevice& device) {
     for (const auto extension : requiredExtensions) {
         if (!utils::contains(
                 availableExtensions, extension, &vk::ExtensionProperties::extensionName)) {
-            std::cerr << extension << " not present\n";
-            std::cerr << device.getProperties().deviceName << " is not compatible\n";
+            spdlog::debug(
+                "Physical device {} is not compatible", device.getProperties().deviceName);
             return false;
         }
     }
@@ -184,7 +202,7 @@ bool Instance::isDeviceCompatible(const vk::raii::PhysicalDevice& device) {
 void Instance::removeIncompatiblePhysicalDevices(vk::raii::PhysicalDevices& devices) const {
     auto incompatibleCount
         = std::erase_if(devices, [](auto&& device) { return !isDeviceCompatible(device); });
-    std::cout << "Removed " << incompatibleCount << " devices\n";
+    spdlog::debug("Removed {} incompatible physical devices", incompatibleCount);
 }
 
 } // namespace magma

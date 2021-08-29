@@ -33,6 +33,8 @@ find_package(glfw3 3.3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
+include(${PROJECT_SOURCE_DIR}/cmake/Dependencies/SpdLog.cmake)
+
 ################################################################################
 ### Include utility scripts
 ################################################################################
@@ -69,7 +71,7 @@ target_link_libraries(Magma
     PUBLIC
         glm::glm glfw Vulkan::Vulkan
     PRIVATE
-        ${CMAKE_DL_LIBS}
+        ${CMAKE_DL_LIBS} spdlog::spdlog
 )
 
 add_library(Magma::Magma ALIAS Magma)

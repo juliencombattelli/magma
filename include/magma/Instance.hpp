@@ -7,8 +7,6 @@
 
 #include <magma/Vulkan.hpp>
 
-#include <iostream> // TODO remove
-
 namespace magma {
 
 /**
@@ -20,7 +18,7 @@ struct ContextDebugConfig {
      */
     bool validationLayer = false;
     /**
-     * @brief Enable the debug utils extension to get more information using the debug messenger
+     * @brief Enable the debug utils extension to get more information for debug purposes
      */
     bool debugUtilsExtension = false;
     /**
