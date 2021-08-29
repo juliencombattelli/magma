@@ -109,6 +109,7 @@ vk::raii::DebugUtilsMessengerEXT Instance::makeDebugMessenger() const {
         if (createInfo_.debugConfig.verbose) {
             debugUtilsMessengerInfo.messageSeverity
                 |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose;
+            spdlog::set_level(spdlog::level::debug);
         }
         return vk::raii::DebugUtilsMessengerEXT(instance_, debugUtilsMessengerInfo);
     }
