@@ -1,6 +1,9 @@
 #include <magma/Instance.hpp>
 
+#include <algorithm>
 #include <iostream>
+#include <ranges>
+#include <span>
 
 #ifndef VK_LAY_KHRONOS_VALIDATION_LAYER_NAME
 #define VK_LAY_KHRONOS_VALIDATION_LAYER_NAME "VK_LAYER_KHRONOS_validation"
@@ -111,16 +114,56 @@ Instance::ContextCreateInfoWrapper::ContextCreateInfoWrapper(const ContextCreate
     }
 }
 
-namespace {
+class DefaultPhysicalDevicePicker {
+public:
+    const vk::raii::PhysicalDevice& operator()(const vk::raii::PhysicalDevices& devices) const {
+        return pick(devices);
+    }
 
-const vk::raii::PhysicalDevice& defaultPicker(const vk::raii::PhysicalDevices& devices) {
-    return devices.front();
-}
+private:
+    using Score = int;
 
-} // namespace
+    static const vk::raii::PhysicalDevice& pick(const vk::raii::PhysicalDevices& devices) {
+        std::vector<int> scores(devices.size());
+        for (std::size_t i = 0; i < devices.size(); i++) {
+            scores[i] += getDeviceTypeScore(devices[i].getProperties().deviceType);
+            scores[i] += getDeviceMemoryScore(devices[i].getMemoryProperties());
+        }
+        auto bestDeviceIndex = std::distance(std::ranges::max_element(scores), scores.begin());
+        return devices[std::size_t(bestDeviceIndex)];
+    }
+
+    static Score getDeviceTypeScore(vk::PhysicalDeviceType type) {
+        switch (type) {
+        case vk::PhysicalDeviceType::eDiscreteGpu:
+            return 8;
+        case vk::PhysicalDeviceType::eIntegratedGpu:
+            return 2;
+        case vk::PhysicalDeviceType::eVirtualGpu:
+            return 0;
+        case vk::PhysicalDeviceType::eCpu:
+            return -2;
+        case vk::PhysicalDeviceType::eOther:
+            return -8;
+        }
+        throw std::logic_error("Unsupported vk::PhysicalDeviceType");
+    }
+
+    static Score getDeviceMemoryScore(const vk::PhysicalDeviceMemoryProperties& memoryProperties) {
+        constexpr auto isLocalHeap = [](const vk::MemoryHeap& heap) {
+            return bool(heap.flags & vk::MemoryHeapFlagBits::eDeviceLocal);
+        };
+        auto localHeaps
+            = std::span(memoryProperties.memoryHeaps.data(), memoryProperties.memoryHeapCount)
+            | std::views::filter(isLocalHeap);
+        auto largestHeap = std::ranges::max(localHeaps, {}, &vk::MemoryHeap::size);
+        // Score is number of GB of memory
+        return Score(largestHeap.size / (1024 * 1024 * 1024));
+    }
+};
 
 vk::raii::PhysicalDevice Instance::pickPhysicalDevice() const {
-    return pickPhysicalDevice(defaultPicker);
+    return pickPhysicalDevice(DefaultPhysicalDevicePicker{});
 }
 
 bool Instance::isDeviceCompatible(const vk::raii::PhysicalDevice& device) {
