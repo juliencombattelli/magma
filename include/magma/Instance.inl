@@ -1,5 +1,7 @@
 #pragma once
 
+#include <magma/Vulkan.hpp>
+
 namespace magma {
 
 template<typename TPhysicalDevicePicker>

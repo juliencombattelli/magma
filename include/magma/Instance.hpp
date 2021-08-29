@@ -5,8 +5,7 @@
 #include <magma/utils/Algorithm.hpp>
 #include <magma/utils/Name.hpp>
 
-#define VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
-#include <vulkan/vulkan_raii.hpp>
+#include <magma/Vulkan.hpp>
 
 #include <iostream> // TODO remove
 
