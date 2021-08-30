@@ -5,9 +5,10 @@
 namespace magma {
 
 template<typename TPhysicalDevicePicker>
-vk::raii::PhysicalDevice Instance::pickPhysicalDevice(TPhysicalDevicePicker&& pick) const {
+vk::raii::PhysicalDevice Instance::pickPhysicalDevice(
+    const vk::raii::SurfaceKHR& surface, TPhysicalDevicePicker&& pick) const {
     vk::raii::PhysicalDevices devices(instance_);
-    removeIncompatiblePhysicalDevices(devices);
+    removeIncompatiblePhysicalDevices(devices, surface);
     const auto& pickedDevice = pick(devices);
     // A move is not possible as it would fallback to a copy since pickedDevice is const. And
     // pick function has to return a const PhysicalDevice&, otherwise implementation would be

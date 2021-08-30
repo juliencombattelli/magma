@@ -66,15 +66,18 @@ public:
     // TODO temporary, remove
     operator const vk::raii::Instance&() const noexcept { return instance_; }
 
-    vk::raii::PhysicalDevice pickPhysicalDevice() const;
+    vk::raii::PhysicalDevice pickPhysicalDevice(const vk::raii::SurfaceKHR& surface) const;
 
     template<typename TPhysicalDevicePicker>
-    vk::raii::PhysicalDevice pickPhysicalDevice(TPhysicalDevicePicker&& pick) const;
+    vk::raii::PhysicalDevice pickPhysicalDevice(
+        const vk::raii::SurfaceKHR& surface, TPhysicalDevicePicker&& pick) const;
 
 private:
-    static bool isDeviceCompatible(const vk::raii::PhysicalDevice& device);
+    static bool isDeviceCompatible(
+        const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface);
 
-    void removeIncompatiblePhysicalDevices(vk::raii::PhysicalDevices& devices) const;
+    void removeIncompatiblePhysicalDevices(
+        vk::raii::PhysicalDevices& devices, const vk::raii::SurfaceKHR& surface) const;
 
     vk::raii::Instance makeInstance() const;
     vk::raii::DebugUtilsMessengerEXT makeDebugMessenger() const;

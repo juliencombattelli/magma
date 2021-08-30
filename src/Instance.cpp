@@ -181,28 +181,95 @@ private:
     }
 };
 
-vk::raii::PhysicalDevice Instance::pickPhysicalDevice() const {
-    return pickPhysicalDevice(DefaultPhysicalDevicePicker{});
+vk::raii::PhysicalDevice Instance::pickPhysicalDevice(const vk::raii::SurfaceKHR& surface) const {
+    return pickPhysicalDevice(surface, DefaultPhysicalDevicePicker{});
 }
 
-bool Instance::isDeviceCompatible(const vk::raii::PhysicalDevice& device) {
+static bool areRequiredDeviceExtensionsAvailable(const vk::raii::PhysicalDevice& device) {
     static const std::vector<std::string_view> requiredExtensions
         = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     const auto availableExtensions = device.enumerateDeviceExtensionProperties();
-    for (const auto extension : requiredExtensions) {
+    bool extensionsSupported = true;
+    // Check availability of all extensions
+    for (auto extension : requiredExtensions) {
         if (!utils::contains(
                 availableExtensions, extension, &vk::ExtensionProperties::extensionName)) {
-            spdlog::debug(
-                "Physical device {} is not compatible", device.getProperties().deviceName);
+            spdlog::debug("Device does not support extension {}", extension);
+            extensionsSupported = false;
+        }
+    }
+    return extensionsSupported;
+}
+
+static bool isAtLeastOneSurfaceFormatAvailable(
+    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+    auto surfaceFormats = device.getSurfaceFormatsKHR(*surface);
+    if (surfaceFormats.empty()) {
+        spdlog::debug("Device does not provide any surface format");
+        return false;
+    }
+    return true;
+}
+
+static bool isAtLeastOneSurfacePresentModeAvailable(
+    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+    auto surfacePresentModes = device.getSurfacePresentModesKHR(*surface);
+    if (surfacePresentModes.empty()) {
+        spdlog::debug("Device does not provide any surface present mode");
+        return false;
+    }
+    return true;
+}
+
+static bool areGraphicsAndPresentationCapabilitiesSupported(
+    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+    auto queueFamilyProperties = device.getQueueFamilyProperties();
+    std::optional<uint32_t> queueGraphicsFamilyIndex;
+    for (auto queueFamilyIt = queueFamilyProperties.begin();
+         queueFamilyIt != queueFamilyProperties.end(); ++queueFamilyIt) {
+        if (queueFamilyIt->queueFlags & vk::QueueFlagBits::eGraphics) {
+            queueGraphicsFamilyIndex = std::distance(queueFamilyProperties.begin(), queueFamilyIt);
+        }
+        if (!queueGraphicsFamilyIndex) {
+            spdlog::debug("Device does not support graphics");
+            return false;
+        }
+        auto presentSupport = device.getSurfaceSupportKHR(*queueGraphicsFamilyIndex, *surface);
+        if (!presentSupport) {
+            spdlog::debug("Device does not support presentation");
             return false;
         }
     }
     return true;
 }
 
-void Instance::removeIncompatiblePhysicalDevices(vk::raii::PhysicalDevices& devices) const {
-    auto incompatibleCount
-        = std::erase_if(devices, [](auto&& device) { return !isDeviceCompatible(device); });
+bool Instance::isDeviceCompatible(
+    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+
+    const auto& deviceName = device.getProperties().deviceName;
+
+    spdlog::debug("Checking if physical device {} is compatible", deviceName);
+
+    constexpr auto fails = [](bool test) { return test == false; };
+    auto checks = {
+        areRequiredDeviceExtensionsAvailable(device),
+        isAtLeastOneSurfaceFormatAvailable(device, surface),
+        isAtLeastOneSurfacePresentModeAvailable(device, surface),
+        areGraphicsAndPresentationCapabilitiesSupported(device, surface),
+    };
+    if (std::ranges::any_of(checks, fails)) {
+        spdlog::warn("Physical device {} is not compatible", deviceName);
+        return false;
+    }
+
+    spdlog::debug("Physical device {} is compatible", deviceName);
+    return true;
+}
+
+void Instance::removeIncompatiblePhysicalDevices(
+    vk::raii::PhysicalDevices& devices, const vk::raii::SurfaceKHR& surface) const {
+    auto incompatibleCount = std::erase_if(
+        devices, [&surface](auto&& device) { return !isDeviceCompatible(device, surface); });
     spdlog::debug("Removed {} incompatible physical devices", incompatibleCount);
 }
 
