@@ -69,9 +69,9 @@ target_include_directories(Magma
 )
 target_link_libraries(Magma
     PUBLIC
-        glm::glm glfw Vulkan::Vulkan
+        glm::glm glfw Vulkan::Vulkan spdlog::spdlog
     PRIVATE
-        ${CMAKE_DL_LIBS} spdlog::spdlog
+        ${CMAKE_DL_LIBS}
 )
 
 add_library(Magma::Magma ALIAS Magma)
