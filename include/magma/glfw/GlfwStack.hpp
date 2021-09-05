@@ -16,12 +16,15 @@ public:
      * @brief Default constructor using the default error callback
      */
     GlfwStack()
-        : GlfwStack(defaultErrorCallback) {}
+        : GlfwStack(defaultErrorCallback)
+    {
+    }
 
     /**
      * @brief Delegated constructor performing GLFW initialization
      */
-    GlfwStack(GLFWerrorfun errorCallback) {
+    GlfwStack(GLFWerrorfun errorCallback)
+    {
         glfwSetErrorCallback(errorCallback);
         auto initSuccessful = glfwInit();
         (void)initSuccessful; // If glfwInit fails, error_callback will be called.
@@ -37,7 +40,8 @@ private:
     /**
      * @brief Default error callback throwing a GlfwError exception
      */
-    static void defaultErrorCallback(int error, const char* description) {
+    static void defaultErrorCallback(int error, const char* description)
+    {
         // TODO ensure throwing an exception from this callback is not undefined behavior
         throw GlfwError(error, description);
     }

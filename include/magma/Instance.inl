@@ -6,7 +6,9 @@ namespace magma {
 
 template<typename TPhysicalDevicePicker>
 vk::raii::PhysicalDevice Instance::pickPhysicalDevice(
-    const vk::raii::SurfaceKHR& surface, TPhysicalDevicePicker&& pick) const {
+    const vk::raii::SurfaceKHR& surface,
+    TPhysicalDevicePicker&& pick) const
+{
     vk::raii::PhysicalDevices devices(instance_);
     removeIncompatiblePhysicalDevices(devices, surface);
     const auto& pickedDevice = pick(devices);

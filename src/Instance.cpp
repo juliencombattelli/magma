@@ -10,11 +10,13 @@
 #define VK_LAY_KHRONOS_VALIDATION_LAYER_NAME "VK_LAYER_KHRONOS_validation"
 #endif
 
-static bool debugCallbackCpp(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+static bool debugCallbackCpp(
+    vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
     vk::DebugUtilsMessageTypeFlagsEXT /*type*/,
-    const vk::DebugUtilsMessengerCallbackDataEXT& cbData, void* /*userdata*/) {
-
-    if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eError) {
+    const vk::DebugUtilsMessengerCallbackDataEXT& cbData,
+    void* /*userdata*/)
+{
+    if /*  */ (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eError) {
         spdlog::error(cbData.pMessage);
     } else if (severity & vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning) {
         spdlog::warn(cbData.pMessage);
@@ -26,20 +28,26 @@ static bool debugCallbackCpp(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
     return false;
 }
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-    VkDebugUtilsMessageTypeFlagsEXT type, const VkDebugUtilsMessengerCallbackDataEXT* cbData,
-    void* userdata) {
-
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    VkDebugUtilsMessageTypeFlagsEXT type,
+    const VkDebugUtilsMessengerCallbackDataEXT* cbData,
+    void* userdata)
+{
     vk::DebugUtilsMessengerCallbackDataEXT callbackData;
     callbackData = *cbData;
-    return debugCallbackCpp(static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(severity),
-        static_cast<vk::DebugUtilsMessageTypeFlagBitsEXT>(type), callbackData, userdata);
+    return debugCallbackCpp(
+        static_cast<vk::DebugUtilsMessageSeverityFlagBitsEXT>(severity),
+        static_cast<vk::DebugUtilsMessageTypeFlagBitsEXT>(type),
+        callbackData,
+        userdata);
 }
 
 namespace magma {
 
 // TODO consider policy class for missing extensions handlers
-static void logNotSupportedExtensions(const std::vector<const char*>& extensions) {
+static void logNotSupportedExtensions(const std::vector<const char*>& extensions)
+{
     const auto supportedExtensions = vk::enumerateInstanceExtensionProperties();
     for (const auto& requestedExtension : extensions) {
         if (std::ranges::find_if(
@@ -51,7 +59,8 @@ static void logNotSupportedExtensions(const std::vector<const char*>& extensions
         }
     }
 }
-static void logNotSupportedLayers(const std::vector<const char*>& layers) {
+static void logNotSupportedLayers(const std::vector<const char*>& layers)
+{
     const auto supportedLayers = vk::enumerateInstanceLayerProperties();
     for (const auto& requestedLayer : layers) {
         if (std::ranges::find_if(
@@ -67,23 +76,27 @@ static void logNotSupportedLayers(const std::vector<const char*>& layers) {
 Instance::Instance(const ContextCreateInfo& createInfo)
     : createInfo_(createInfo)
     , instance_(makeInstance())
-    , debugUtilsMessenger_(makeDebugMessenger()) {}
+    , debugUtilsMessenger_(makeDebugMessenger())
+{
+}
 
-vk::raii::SurfaceKHR Instance::makeSurface(GLFWwindow* window) {
+vk::raii::SurfaceKHR Instance::makeSurface(GLFWwindow* window)
+{
     VkSurfaceKHR surface;
     glfwCreateWindowSurface(*instance_, window, nullptr, &surface);
     return vk::raii::SurfaceKHR(instance_, surface);
 }
 
-vk::raii::Instance Instance::makeInstance() const {
-    vk::ApplicationInfo appInfo{
+vk::raii::Instance Instance::makeInstance() const
+{
+    vk::ApplicationInfo appInfo {
         .pApplicationName = createInfo_.applicationName,
         .applicationVersion = createInfo_.applicationVersion,
         .pEngineName = magma::EngineInfo::name,
         .engineVersion = magma::EngineInfo::version,
         .apiVersion = VK_API_VERSION_1_2,
     };
-    vk::InstanceCreateInfo instanceCreateInfo{
+    vk::InstanceCreateInfo instanceCreateInfo {
         .pApplicationInfo = &appInfo,
         .enabledLayerCount = static_cast<uint32_t>(createInfo_.layers.size()),
         .ppEnabledLayerNames = createInfo_.layers.data(),
@@ -95,9 +108,10 @@ vk::raii::Instance Instance::makeInstance() const {
     return vk::raii::Instance(context_, instanceCreateInfo);
 }
 
-vk::raii::DebugUtilsMessengerEXT Instance::makeDebugMessenger() const {
+vk::raii::DebugUtilsMessengerEXT Instance::makeDebugMessenger() const
+{
     if (createInfo_.debugConfig.debugUtilsExtension) {
-        vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerInfo{
+        vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerInfo {
             .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo
                 | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
                 | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
@@ -117,12 +131,14 @@ vk::raii::DebugUtilsMessengerEXT Instance::makeDebugMessenger() const {
 }
 
 Instance::ContextCreateInfoWrapper::ContextCreateInfoWrapper(const ContextCreateInfo& createInfo)
-    : ContextCreateInfo(createInfo) {
+    : ContextCreateInfo(createInfo)
+{
     // Append extensions required by GLFW
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     utils::name::appendIfNotPresent(
-        extensions, std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount));
+        extensions,
+        std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount));
     // Append Khronos Debug Utils extension
     if (debugConfig.debugUtilsExtension) {
         utils::name::appendIfNotPresent(extensions, { VK_EXT_DEBUG_UTILS_EXTENSION_NAME });
@@ -135,14 +151,16 @@ Instance::ContextCreateInfoWrapper::ContextCreateInfoWrapper(const ContextCreate
 
 class DefaultPhysicalDevicePicker {
 public:
-    const vk::raii::PhysicalDevice& operator()(const vk::raii::PhysicalDevices& devices) const {
+    const vk::raii::PhysicalDevice& operator()(const vk::raii::PhysicalDevices& devices) const
+    {
         return pick(devices);
     }
 
 private:
     using Score = int;
 
-    static const vk::raii::PhysicalDevice& pick(const vk::raii::PhysicalDevices& devices) {
+    static const vk::raii::PhysicalDevice& pick(const vk::raii::PhysicalDevices& devices)
+    {
         std::vector<int> scores(devices.size());
         for (std::size_t i = 0; i < devices.size(); i++) {
             scores[i] += getDeviceTypeScore(devices[i].getProperties().deviceType);
@@ -152,7 +170,8 @@ private:
         return devices[std::size_t(bestDeviceIndex)];
     }
 
-    static Score getDeviceTypeScore(vk::PhysicalDeviceType type) {
+    static Score getDeviceTypeScore(vk::PhysicalDeviceType type)
+    {
         switch (type) {
         case vk::PhysicalDeviceType::eDiscreteGpu:
             return 8;
@@ -168,7 +187,8 @@ private:
         throw std::logic_error("Unsupported vk::PhysicalDeviceType");
     }
 
-    static Score getDeviceMemoryScore(const vk::PhysicalDeviceMemoryProperties& memoryProperties) {
+    static Score getDeviceMemoryScore(const vk::PhysicalDeviceMemoryProperties& memoryProperties)
+    {
         constexpr auto isLocalHeap = [](const vk::MemoryHeap& heap) {
             return bool(heap.flags & vk::MemoryHeapFlagBits::eDeviceLocal);
         };
@@ -181,11 +201,13 @@ private:
     }
 };
 
-vk::raii::PhysicalDevice Instance::pickPhysicalDevice(const vk::raii::SurfaceKHR& surface) const {
-    return pickPhysicalDevice(surface, DefaultPhysicalDevicePicker{});
+vk::raii::PhysicalDevice Instance::pickPhysicalDevice(const vk::raii::SurfaceKHR& surface) const
+{
+    return pickPhysicalDevice(surface, DefaultPhysicalDevicePicker {});
 }
 
-static bool areRequiredDeviceExtensionsAvailable(const vk::raii::PhysicalDevice& device) {
+static bool areRequiredDeviceExtensionsAvailable(const vk::raii::PhysicalDevice& device)
+{
     static const std::vector<std::string_view> requiredExtensions
         = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
     const auto availableExtensions = device.enumerateDeviceExtensionProperties();
@@ -193,7 +215,9 @@ static bool areRequiredDeviceExtensionsAvailable(const vk::raii::PhysicalDevice&
     // Check availability of all extensions
     for (auto extension : requiredExtensions) {
         if (!utils::contains(
-                availableExtensions, extension, &vk::ExtensionProperties::extensionName)) {
+                availableExtensions,
+                extension,
+                &vk::ExtensionProperties::extensionName)) {
             spdlog::debug("Device does not support extension {}", extension);
             extensionsSupported = false;
         }
@@ -202,7 +226,9 @@ static bool areRequiredDeviceExtensionsAvailable(const vk::raii::PhysicalDevice&
 }
 
 static bool isAtLeastOneSurfaceFormatAvailable(
-    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+    const vk::raii::PhysicalDevice& device,
+    const vk::raii::SurfaceKHR& surface)
+{
     auto surfaceFormats = device.getSurfaceFormatsKHR(*surface);
     if (surfaceFormats.empty()) {
         spdlog::debug("Device does not provide any surface format");
@@ -212,7 +238,9 @@ static bool isAtLeastOneSurfaceFormatAvailable(
 }
 
 static bool isAtLeastOneSurfacePresentModeAvailable(
-    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+    const vk::raii::PhysicalDevice& device,
+    const vk::raii::SurfaceKHR& surface)
+{
     auto surfacePresentModes = device.getSurfacePresentModesKHR(*surface);
     if (surfacePresentModes.empty()) {
         spdlog::debug("Device does not provide any surface present mode");
@@ -222,11 +250,14 @@ static bool isAtLeastOneSurfacePresentModeAvailable(
 }
 
 static bool areGraphicsAndPresentationCapabilitiesSupported(
-    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+    const vk::raii::PhysicalDevice& device,
+    const vk::raii::SurfaceKHR& surface)
+{
     auto queueFamilyProperties = device.getQueueFamilyProperties();
     std::optional<uint32_t> queueGraphicsFamilyIndex;
     for (auto queueFamilyIt = queueFamilyProperties.begin();
-         queueFamilyIt != queueFamilyProperties.end(); ++queueFamilyIt) {
+         queueFamilyIt != queueFamilyProperties.end();
+         ++queueFamilyIt) {
         if (queueFamilyIt->queueFlags & vk::QueueFlagBits::eGraphics) {
             queueGraphicsFamilyIndex = std::distance(queueFamilyProperties.begin(), queueFamilyIt);
         }
@@ -244,7 +275,9 @@ static bool areGraphicsAndPresentationCapabilitiesSupported(
 }
 
 bool Instance::isDeviceCompatible(
-    const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) {
+    const vk::raii::PhysicalDevice& device,
+    const vk::raii::SurfaceKHR& surface)
+{
 
     const auto& deviceName = device.getProperties().deviceName;
 
@@ -267,9 +300,12 @@ bool Instance::isDeviceCompatible(
 }
 
 void Instance::removeIncompatiblePhysicalDevices(
-    vk::raii::PhysicalDevices& devices, const vk::raii::SurfaceKHR& surface) const {
-    auto incompatibleCount = std::erase_if(
-        devices, [&surface](auto&& device) { return !isDeviceCompatible(device, surface); });
+    vk::raii::PhysicalDevices& devices,
+    const vk::raii::SurfaceKHR& surface) const
+{
+    auto incompatibleCount = std::erase_if(devices, [&surface](auto&& device) {
+        return !isDeviceCompatible(device, surface);
+    });
     spdlog::debug("Removed {} incompatible physical devices", incompatibleCount);
 }
 

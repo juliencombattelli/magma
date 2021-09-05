@@ -35,14 +35,16 @@ public:
     using Ptr = std::unique_ptr<T, Deleter>;
 
     template<typename... TArgs>
-    [[nodiscard]] static Ptr create(TArgs&&... args) {
-        return Ptr{ allocator(std::forward<TArgs>(args)...) };
+    [[nodiscard]] static Ptr create(TArgs&&... args)
+    {
+        return Ptr { allocator(std::forward<TArgs>(args)...) };
     }
 
 private:
     struct Deleter {
         template<typename... TArgs>
-        auto operator()(TArgs&&... args) const {
+        auto operator()(TArgs&&... args) const
+        {
             return deleter(std::forward<TArgs>(args)...);
         }
     };

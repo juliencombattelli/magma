@@ -9,7 +9,9 @@ class GlfwError : public std::runtime_error {
 public:
     GlfwError(int error, const char* description)
         : std::runtime_error(std::string("from GLFW: ") + description)
-        , error_{ error } {}
+        , error_ { error }
+    {
+    }
 
     [[nodiscard]] int error_code() const noexcept { return error_; }
 

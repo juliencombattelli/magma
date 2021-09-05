@@ -70,14 +70,17 @@ public:
 
     template<typename TPhysicalDevicePicker>
     vk::raii::PhysicalDevice pickPhysicalDevice(
-        const vk::raii::SurfaceKHR& surface, TPhysicalDevicePicker&& pick) const;
+        const vk::raii::SurfaceKHR& surface,
+        TPhysicalDevicePicker&& pick) const;
 
 private:
     static bool isDeviceCompatible(
-        const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface);
+        const vk::raii::PhysicalDevice& device,
+        const vk::raii::SurfaceKHR& surface);
 
     void removeIncompatiblePhysicalDevices(
-        vk::raii::PhysicalDevices& devices, const vk::raii::SurfaceKHR& surface) const;
+        vk::raii::PhysicalDevices& devices,
+        const vk::raii::SurfaceKHR& surface) const;
 
     vk::raii::Instance makeInstance() const;
     vk::raii::DebugUtilsMessengerEXT makeDebugMessenger() const;
