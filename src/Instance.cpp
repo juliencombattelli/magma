@@ -1,4 +1,5 @@
 #include <magma/Instance.hpp>
+#include <magma/utils/VkUtils.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -112,12 +113,14 @@ vk::raii::DebugUtilsMessengerEXT Instance::makeDebugMessenger() const
 {
     if (createInfo_.debugConfig.debugUtilsExtension) {
         vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerInfo {
-            .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo
-                | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning
-                | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-            .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral
-                | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
-                | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
+            .messageSeverity = vkutils::setFlags(
+                vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo,
+                vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
+                vk::DebugUtilsMessageSeverityFlagBitsEXT::eError),
+            .messageType = vkutils::setFlags(
+                vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral,
+                vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
+                vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation),
             .pfnUserCallback = debugCallback,
         };
         if (createInfo_.debugConfig.verbose) {
