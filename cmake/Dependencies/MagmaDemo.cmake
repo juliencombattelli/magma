@@ -6,7 +6,7 @@ include(FetchContent)
 FetchContent_Declare(
     magma-demo
     GIT_REPOSITORY  git@github.com:juliencombattelli/magma-demo
-    GIT_TAG         main
+    GIT_TAG         origin/main
 )
 
 FetchContent_MakeAvailable(magma-demo)
