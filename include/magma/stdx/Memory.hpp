@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace utils::memory {
+namespace magma::stdx {
 
 /**
  * @brief Factory class generating unique_ptr from allocator/deleter functions.
@@ -50,4 +50,4 @@ private:
     };
 };
 
-} // namespace utils::memory
+} // namespace magma::stdx

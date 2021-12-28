@@ -57,7 +57,7 @@ configure_file(
     "${PROJECT_BINARY_DIR}/include/magma/Version.hpp"
 )
 
-add_library(Magma src/Instance.cpp src/utils/Name.cpp)
+add_library(Magma src/Instance.cpp src/stdx/Name.cpp)
 target_project_warnings(Magma)
 target_enable_sanitizers(Magma)
 target_compile_features(Magma PUBLIC cxx_std_20)

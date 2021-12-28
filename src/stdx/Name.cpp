@@ -1,6 +1,6 @@
-#include <magma/utils/Name.hpp>
+#include <magma/stdx/Name.hpp>
 
-namespace utils::name {
+namespace magma::stdx {
 
 void appendIfNotPresent(std::vector<const char*>& list, const std::vector<const char*>& names)
 {
@@ -11,4 +11,4 @@ void appendIfNotPresent(std::vector<const char*>& list, const std::vector<const 
     }
 }
 
-} // namespace utils::name
+} // namespace magma::stdx

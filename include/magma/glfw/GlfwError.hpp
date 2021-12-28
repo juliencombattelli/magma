@@ -13,7 +13,10 @@ public:
     {
     }
 
-    [[nodiscard]] int error_code() const noexcept { return error_; }
+    [[nodiscard]] int error_code() const noexcept
+    {
+        return error_;
+    }
 
 private:
     const int error_;

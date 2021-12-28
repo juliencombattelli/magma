@@ -1,7 +1,7 @@
 #pragma once
 
 #include <magma/glfw/GlfwError.hpp>
-#include <magma/utils/Memory.hpp>
+#include <magma/stdx/Memory.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -34,7 +34,10 @@ public:
     /**
      * @brief Destructor performing GLFW cleanup
      */
-    ~GlfwStack() noexcept { glfwTerminate(); }
+    ~GlfwStack() noexcept
+    {
+        glfwTerminate();
+    }
 
 private:
     /**
@@ -47,6 +50,6 @@ private:
     }
 };
 
-using GlfwWindow = utils::memory::UniquePtrFactory<GLFWwindow, glfwCreateWindow, glfwDestroyWindow>;
+using GlfwWindow = stdx::UniquePtrFactory<GLFWwindow, glfwCreateWindow, glfwDestroyWindow>;
 
 } // namespace magma

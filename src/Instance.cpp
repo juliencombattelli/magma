@@ -1,5 +1,5 @@
 #include <magma/Instance.hpp>
-#include <magma/utils/VkUtils.hpp>
+#include <magma/vkx/VkUtils.hpp>
 
 #include <spdlog/spdlog.h>
 
@@ -113,11 +113,11 @@ vk::raii::DebugUtilsMessengerEXT Instance::makeDebugMessenger() const
 {
     if (createInfo_.debugConfig.debugUtilsExtension) {
         vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerInfo {
-            .messageSeverity = vkutils::setFlags(
+            .messageSeverity = vkx::setFlags(
                 vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo,
                 vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning,
                 vk::DebugUtilsMessageSeverityFlagBitsEXT::eError),
-            .messageType = vkutils::setFlags(
+            .messageType = vkx::setFlags(
                 vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral,
                 vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
                 vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation),
@@ -139,16 +139,16 @@ Instance::ContextCreateInfoWrapper::ContextCreateInfoWrapper(const ContextCreate
     // Append extensions required by GLFW
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    utils::name::appendIfNotPresent(
+    stdx::appendIfNotPresent(
         extensions,
         std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount));
     // Append Khronos Debug Utils extension
     if (debugConfig.debugUtilsExtension) {
-        utils::name::appendIfNotPresent(extensions, { VK_EXT_DEBUG_UTILS_EXTENSION_NAME });
+        stdx::appendIfNotPresent(extensions, { VK_EXT_DEBUG_UTILS_EXTENSION_NAME });
     }
     // Append LunarG validation layer
     if (debugConfig.validationLayer) {
-        utils::name::appendIfNotPresent(layers, { VK_LAY_KHRONOS_VALIDATION_LAYER_NAME });
+        stdx::appendIfNotPresent(layers, { VK_LAY_KHRONOS_VALIDATION_LAYER_NAME });
     }
 }
 
@@ -217,7 +217,7 @@ static bool areRequiredDeviceExtensionsAvailable(const vk::raii::PhysicalDevice&
     bool extensionsSupported = true;
     // Check availability of all extensions
     for (auto extension : requiredExtensions) {
-        if (!utils::contains(
+        if (!stdx::contains(
                 availableExtensions,
                 extension,
                 &vk::ExtensionProperties::extensionName)) {

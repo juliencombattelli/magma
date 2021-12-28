@@ -2,8 +2,8 @@
 
 #include <magma/EngineInfo.hpp>
 #include <magma/glfw/GlfwStack.hpp>
-#include <magma/utils/Algorithm.hpp>
-#include <magma/utils/Name.hpp>
+#include <magma/stdx/Algorithm.hpp>
+#include <magma/stdx/Name.hpp>
 
 #include <magma/Vulkan.hpp>
 
@@ -64,7 +64,10 @@ public:
     vk::raii::SurfaceKHR makeSurface(GLFWwindow* window);
 
     // TODO temporary, remove
-    operator const vk::raii::Instance&() const noexcept { return instance_; }
+    operator const vk::raii::Instance&() const noexcept
+    {
+        return instance_;
+    }
 
     vk::raii::PhysicalDevice pickPhysicalDevice(const vk::raii::SurfaceKHR& surface) const;
 

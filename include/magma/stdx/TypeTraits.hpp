@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace magma {
+namespace magma::stdx {
 
 /**
  * @brief Type trait checking if all given types are identical
@@ -14,4 +14,4 @@ struct areSame {
 template<typename... T>
 inline constexpr bool areSame_v = areSame<T...>::value;
 
-} // namespace magma
+} // namespace magma::stdx
